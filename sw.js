@@ -1,4 +1,4 @@
-var CACHE_NAME = 'prayer-times-v1';
+var CACHE_NAME = 'prayer-times-v2';
 var ASSETS = [
   './',
   './index.html',
@@ -27,14 +27,24 @@ self.addEventListener('activate', function (event) {
   self.clients.claim();
 });
 
+// Network-first for our own files, so a fresh deploy is picked up on the
+// very next load instead of being stuck behind a stale cached copy.
+// Cache is only used as an offline fallback.
 self.addEventListener('fetch', function (event) {
   var url = event.request.url;
   if (url.indexOf('fadlullah.org.lb') !== -1) {
-    return; // always hit network for live prayer-time data
+    return; // always hit network for live prayer-time data, never cache it
   }
+
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      return cached || fetch(event.request);
-    })
+    fetch(event.request)
+      .then(function (response) {
+        var copy = response.clone();
+        caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, copy); });
+        return response;
+      })
+      .catch(function () {
+        return caches.match(event.request);
+      })
   );
 });
