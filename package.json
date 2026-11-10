@@ -1,0 +1,10 @@
+{
+  "name": "prayer-times",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Prayer times PWA based on Sayyid Mohammad Hussein Fadlallah's office (fadlullah.org.lb)",
+  "scripts": {
+    "start": "npx --yes serve -l 8787 .",
+    "icons": "node scripts/make-icons.js"
+  }
+}

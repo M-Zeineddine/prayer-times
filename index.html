@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>مواقيت الصلاة</title>
+  <meta name="description" content="مواقيت الصلاة بحسب مكتب سماحة السيد محمد حسين فضل الله" />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0e5a5e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="مواقيت الصلاة" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+
+    <header class="topbar">
+      <button id="langToggle" class="icon-btn" aria-label="Language">EN</button>
+      <div class="brand">
+        <span class="brand-title" id="brandTitle">مواقيت الصلاة</span>
+        <span class="brand-sub" id="brandSub">مكتب سماحة السيد محمد حسين فضل الله</span>
+      </div>
+      <button id="locationBtn" class="icon-btn" aria-label="Location">
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+      </button>
+    </header>
+
+    <section class="location-row" id="locationRow">
+      <button class="location-chip" id="cityChip">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+        <span id="cityLabel">...</span>
+      </button>
+    </section>
+
+    <section class="date-nav">
+      <button id="prevDay" class="nav-btn" aria-label="Previous day">‹</button>
+      <div class="date-display">
+        <div id="gregDate" class="greg-date">—</div>
+        <div id="hijriDate" class="hijri-date">—</div>
+      </div>
+      <button id="nextDay" class="nav-btn" aria-label="Next day">›</button>
+    </section>
+
+    <section class="next-prayer-card" id="nextPrayerCard">
+      <div class="next-prayer-label" id="nextPrayerLabel">—</div>
+      <div class="next-prayer-countdown" id="nextPrayerCountdown">--:--:--</div>
+      <div class="next-prayer-time" id="nextPrayerTime">—</div>
+    </section>
+
+    <section id="timesGrid" class="times-grid">
+      <div class="loader" id="loader"></div>
+    </section>
+
+    <footer class="app-footer">
+      <span id="sourceLabel">المصدر: </span>
+      <a href="https://www.fadlullah.org.lb/prayer-time" target="_blank" rel="noopener">fadlullah.org.lb</a>
+    </footer>
+  </div>
+
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <div class="sheet" id="citySheet">
+    <div class="sheet-handle"></div>
+    <input type="search" id="citySearch" class="city-search" placeholder="ابحث عن مدينة..." autocomplete="off" />
+    <div id="cityList" class="city-list"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

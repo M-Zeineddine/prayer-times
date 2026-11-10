@@ -1,0 +1,18 @@
+{
+  "name": "مواقيت الصلاة - السيد فضل الله",
+  "short_name": "مواقيت الصلاة",
+  "description": "مواقيت الصلاة بحسب مكتب سماحة السيد محمد حسين فضل الله",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e5a5e",
+  "theme_color": "#0e5a5e",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
