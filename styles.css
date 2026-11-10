@@ -1,26 +1,26 @@
 :root {
-  --bg: #f4f6f5;
-  --card-bg: #ffffff;
-  --text: #16292b;
-  --muted: #6b7a7c;
-  --accent: #0e5a5e;
-  --accent-2: #f2b705;
-  --border: #e4e8e7;
-  --active-bg: #eaf6f2;
+  --bg: #f6f3ec;
+  --card-bg: #f6f3ec;
+  --text: #1c1b17;
+  --muted: #7a7566;
+  --accent: #2f5d50;
+  --accent-2: #9c3b2e;
+  --border: #d9d3c4;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --serif: "Markazi Text", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b1516;
-    --card-bg: #122023;
-    --text: #eef3f2;
-    --muted: #8da3a5;
-    --accent: #3fb9ad;
-    --accent-2: #f2c23c;
-    --border: #1d3033;
-    --active-bg: #16302c;
+    --bg: #15160f;
+    --card-bg: #15160f;
+    --text: #eae6da;
+    --muted: #8c8976;
+    --accent: #6fae9b;
+    --accent-2: #d98f78;
+    --border: #35372a;
   }
 }
 
@@ -31,7 +31,7 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: "Segoe UI", -apple-system, "SF Pro Text", Tahoma, Arial, sans-serif;
+  font-family: "Markazi Text", Georgia, serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -39,122 +39,185 @@ html, body {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  padding-top: calc(var(--safe-top) + 10px);
-  padding-bottom: calc(var(--safe-bottom) + 20px);
+  padding-top: calc(var(--safe-top) + 14px);
+  padding-bottom: calc(var(--safe-bottom) + 24px);
+  padding-left: 18px;
+  padding-right: 18px;
   display: flex;
   flex-direction: column;
 }
 
+/* ---- Header ---- */
+
 .topbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 6px 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
 }
 
-.brand { text-align: center; display: flex; flex-direction: column; }
-.brand-title { font-size: 18px; font-weight: 700; }
-.brand-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.brand { text-align: center; display: flex; flex-direction: column; padding-top: 2px; }
+.brand-title { font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: .3px; }
+.brand-sub { font-size: 11px; color: var(--muted); margin-top: 3px; font-family: system-ui, sans-serif; letter-spacing: .2px; }
 
-.icon-btn {
-  border: none;
-  background: var(--card-bg);
+.sq-btn {
+  border: 1px solid var(--border);
+  background: transparent;
   color: var(--text);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
+  font-family: var(--mono);
+  border-radius: 3px;
 }
+.sq-btn:active { background: var(--border); }
 
-.location-row { display: flex; justify-content: center; padding: 8px 16px 0; }
+/* ---- Location ---- */
 
-.location-chip {
+.location-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--active-bg);
-  color: var(--accent);
+  justify-content: center;
+  background: none;
   border: none;
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  max-width: 100%;
+  color: var(--muted);
+  padding: 12px 0 2px;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
 }
-.location-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
+.location-row span { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-bottom: 1px solid var(--muted); padding-bottom: 1px; }
+
+/* ---- Date nav ---- */
 
 .date-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  padding: 14px 16px 4px;
+  gap: 20px;
+  padding: 10px 0 16px;
 }
 
 .nav-btn {
-  border: none;
-  background: var(--card-bg);
-  color: var(--accent);
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  font-size: 18px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  font-family: var(--mono);
+  border-radius: 3px;
 }
+.nav-btn:active { background: var(--border); }
 
 .date-display { text-align: center; min-width: 180px; }
-.greg-date { font-size: 15px; font-weight: 700; }
-.hijri-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.greg-date { font-family: var(--mono); font-size: 14px; font-weight: 600; letter-spacing: .2px; }
+.hijri-date { font-size: 12px; color: var(--muted); margin-top: 3px; font-family: system-ui, sans-serif; }
 
-.next-prayer-card {
-  margin: 14px 16px 6px;
-  background: linear-gradient(135deg, var(--accent), #0a4245);
-  color: #fff;
-  border-radius: 20px;
-  padding: 20px;
+/* ---- Next prayer ticket ---- */
+
+.next-prayer {
+  border-top: 1px solid var(--text);
+  border-bottom: 1px solid var(--text);
+  padding: 14px 0;
+  margin-bottom: 6px;
+}
+.np-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.np-eyebrow {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.np-name {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  flex: 1;
   text-align: center;
-  box-shadow: 0 8px 20px rgba(14,90,94,.25);
 }
-.next-prayer-label { font-size: 13px; opacity: .85; letter-spacing: .5px; }
-.next-prayer-countdown { font-size: 34px; font-weight: 800; letter-spacing: 1px; margin: 4px 0; font-variant-numeric: tabular-nums; }
-.next-prayer-time { font-size: 14px; opacity: .9; }
-
-.times-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 14px 16px;
-  direction: ltr;
+.np-time {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--muted);
 }
-
-.time-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px 8px;
+.np-countdown {
+  font-family: var(--mono);
+  font-size: 40px;
+  font-weight: 600;
   text-align: center;
-  transition: background .2s, border-color .2s;
-  direction: rtl;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  margin-top: 4px;
 }
-.time-card.active {
-  background: var(--active-bg);
-  border-color: var(--accent);
+
+/* ---- Prayer list ---- */
+
+.prayer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-.time-card .tc-icon { font-size: 20px; margin-bottom: 4px; }
-.time-card .tc-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-.time-card .tc-time { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.prayer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 2px;
+  border-bottom: 1px solid var(--border);
+  border-inline-start: 3px solid transparent;
+  padding-inline-start: 9px;
+}
+.prayer-row:last-child { border-bottom: none; }
+
+.prayer-row.active {
+  border-inline-start-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.prayer-row.active .pr-label,
+.prayer-row.active .pr-time { color: var(--accent); font-weight: 600; }
+
+.pr-icon {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.prayer-row.active .pr-icon { color: var(--accent); }
+
+.pr-label {
+  font-family: var(--serif);
+  font-size: 18px;
+  flex: 1;
+}
+.pr-time {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
 
 .loader {
-  grid-column: 1 / -1;
   text-align: center;
-  padding: 30px;
+  padding: 30px 0;
   color: var(--muted);
   font-size: 14px;
+  font-family: system-ui, sans-serif;
+  list-style: none;
 }
 
 .app-footer {
@@ -162,15 +225,18 @@ html, body {
   text-align: center;
   font-size: 11px;
   color: var(--muted);
-  padding: 16px;
+  padding-top: 24px;
+  font-family: system-ui, sans-serif;
 }
-.app-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.app-footer a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
+
+/* ---- City picker sheet ---- */
 
 .sheet-backdrop {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.4);
+  background: rgba(0,0,0,.35);
   opacity: 0; pointer-events: none;
-  transition: opacity .2s;
+  transition: opacity .15s;
   z-index: 40;
 }
 .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
@@ -178,46 +244,45 @@ html, body {
 .sheet {
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  background: var(--card-bg);
-  border-radius: 20px 20px 0 0;
+  background: var(--bg);
+  border-top: 1px solid var(--text);
   max-height: 75vh;
   transform: translateY(100%);
-  transition: transform .25s ease;
+  transition: transform .2s ease;
   z-index: 41;
   display: flex;
   flex-direction: column;
-  padding: 10px 16px calc(var(--safe-bottom) + 10px);
+  padding: 14px 18px calc(var(--safe-bottom) + 10px);
 }
 .sheet.open { transform: translateY(0); }
 
 .sheet-handle {
-  width: 40px; height: 4px;
+  width: 32px; height: 3px;
   background: var(--border);
-  border-radius: 2px;
-  margin: 2px auto 10px;
+  margin: 0 auto 12px;
 }
 
 .city-search {
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: transparent;
   color: var(--text);
-  border-radius: 10px;
-  padding: 10px 12px;
+  border-radius: 3px;
+  padding: 9px 11px;
   font-size: 15px;
-  margin-bottom: 8px;
+  font-family: system-ui, sans-serif;
+  margin-bottom: 4px;
 }
 
-.city-list { overflow-y: auto; flex: 1; }
+.city-list { overflow-y: auto; flex: 1; font-family: system-ui, sans-serif; }
 
 .city-item {
-  padding: 12px 6px;
+  padding: 12px 4px;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
   display: flex;
   justify-content: space-between;
 }
-.city-item .ci-country { color: var(--muted); font-size: 12px; }
-.city-item:active { background: var(--active-bg); }
+.city-item .ci-country { color: var(--muted); font-size: 11px; letter-spacing: .3px; }
+.city-item:active { background: color-mix(in srgb, var(--text) 6%, transparent); }
 
 html[dir="ltr"] #app { direction: ltr; }
-html[dir="ltr"] .time-card { direction: ltr; }

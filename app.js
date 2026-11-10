@@ -23,9 +23,19 @@
     }
   };
 
-  var ICON_EMOJI = {
-    imsak: '🌙', fajr: '🌄', shourouk: '🌅', doher: '☀️',
-    '3asr': '🌤️', maghreb: '🌇', homra: '🔴', '3asha': '🌃', midnight: '🌑'
+  // Small hand-drawn line icons (sun position relative to the horizon for the
+  // five solar markers, crescent/stars for the three lunar/night markers).
+  // Deliberately not emoji.
+  var ICON_SVG = {
+    imsak: '<svg viewBox="0 0 22 22" width="20" height="20"><path d="M13.6 4.3a6.4 6.4 0 1 0 4.4 9.7A7.9 7.9 0 0 1 13.6 4.3Z" fill="currentColor"/></svg>',
+    fajr: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="16" x2="19.5" y2="16"/><circle cx="11" cy="16" r="3"/><path d="M11 9.8v1.7"/><path d="M7 11.4l1.3 1.3"/><path d="M15 11.4l-1.3 1.3"/></svg>',
+    shourouk: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="16" x2="19.5" y2="16"/><circle cx="11" cy="12.3" r="3"/><path d="M11 6.2v1.7"/><path d="M6.4 9.6l1.3 1.3"/><path d="M15.6 9.6l-1.3 1.3"/></svg>',
+    doher: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="3.2"/><path d="M11 4.2v2"/><path d="M11 15.8v2"/><path d="M4.2 11h2"/><path d="M15.8 11h2"/><path d="M6.4 6.4l1.4 1.4"/><path d="M14.2 14.2l1.4 1.4"/><path d="M15.6 6.4l-1.4 1.4"/><path d="M7.8 14.2l-1.4 1.4"/></svg>',
+    '3asr': '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="16" x2="19.5" y2="16"/><circle cx="11" cy="10.3" r="3"/><path d="M11 5v1.4"/><path d="M6.6 7.2l1 1"/><path d="M15.4 7.2l-1 1"/></svg>',
+    maghreb: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="16" x2="19.5" y2="16"/><circle cx="11" cy="16" r="3"/><path d="M11 20v1.4"/><path d="M7.4 18.4l1-1"/><path d="M14.6 18.4l-1-1"/></svg>',
+    homra: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="13" x2="19.5" y2="13"/><circle cx="11" cy="13" r="1.5" fill="currentColor" stroke="none"/><path d="M4.5 16.6h1.6" opacity=".55"/><path d="M8.7 16.6h1.6" opacity=".55"/><path d="M11.7 16.6h1.6" opacity=".55"/><path d="M15.9 16.6h1.6" opacity=".55"/></svg>',
+    '3asha': '<svg viewBox="0 0 22 22" width="20" height="20"><path d="M13.6 4.3a6.4 6.4 0 1 0 4.4 9.7A7.9 7.9 0 0 1 13.6 4.3Z" fill="currentColor"/><circle cx="5.6" cy="6.4" r="1" fill="currentColor"/></svg>',
+    midnight: '<svg viewBox="0 0 22 22" width="20" height="20"><circle cx="11" cy="11" r="2.4" fill="currentColor"/><circle cx="4.6" cy="5.6" r="0.9" fill="currentColor"/><circle cx="17.4" cy="5.6" r="0.9" fill="currentColor"/><circle cx="4.6" cy="16.4" r="0.9" fill="currentColor"/><circle cx="17.4" cy="16.4" r="0.9" fill="currentColor"/></svg>'
   };
 
   var state = {
@@ -49,7 +59,7 @@
   function cacheEls() {
     ['langToggle', 'locationBtn', 'cityChip', 'cityLabel', 'prevDay', 'nextDay',
       'gregDate', 'hijriDate', 'nextPrayerLabel', 'nextPrayerCountdown', 'nextPrayerTime',
-      'timesGrid', 'sheetBackdrop', 'citySheet', 'citySearch', 'cityList', 'brandSub', 'sourceLabel'].forEach(function (id) {
+      'timesGrid', 'sheetBackdrop', 'citySheet', 'citySearch', 'cityList', 'brandSub', 'sourceLabel', 'nextPrayerEyebrow'].forEach(function (id) {
       el[id] = document.getElementById(id);
     });
   }
@@ -119,7 +129,7 @@
   }
 
   function showLoader(show) {
-    el.timesGrid.innerHTML = show ? '<div class="loader" id="loader">' + (state.lang === 'ar' ? 'جارِ التحميل...' : 'Loading...') + '</div>' : '';
+    el.timesGrid.innerHTML = show ? '<li class="loader" id="loader">' + (state.lang === 'ar' ? 'جارِ التحميل...' : 'Loading...') + '</li>' : '';
   }
 
   function fetchPrayerTimes() {
@@ -141,7 +151,7 @@
         renderDate();
       })
       .catch(function (err) {
-        el.timesGrid.innerHTML = '<div class="loader">' + (state.lang === 'ar' ? 'تعذر تحميل المواقيت' : 'Failed to load times') + '</div>';
+        el.timesGrid.innerHTML = '<li class="loader">' + (state.lang === 'ar' ? 'تعذر تحميل المواقيت' : 'Failed to load times') + '</li>';
         console.error(err);
       });
   }
@@ -159,7 +169,7 @@
 
   function renderTimes() {
     if (!state.items.length) {
-      el.timesGrid.innerHTML = '<div class="loader">' + (state.lang === 'ar' ? 'لا توجد بيانات' : 'No data') + '</div>';
+      el.timesGrid.innerHTML = '<li class="loader">' + (state.lang === 'ar' ? 'لا توجد بيانات' : 'No data') + '</li>';
       return;
     }
     var nowMin = new Date().getHours() * 60 + new Date().getMinutes();
@@ -175,11 +185,11 @@
       if (isPrayer && mins !== null) {
         active = isCurrentPeriod(item.key, mins, nowMin);
       }
-      html += '<div class="time-card' + (active ? ' active' : '') + '" data-key="' + item.key + '">' +
-        '<div class="tc-icon">' + (ICON_EMOJI[item.key] || '') + '</div>' +
-        '<div class="tc-label">' + (LABELS[state.lang][item.key] || item.rawLabel) + '</div>' +
-        '<div class="tc-time">' + item.time + '</div>' +
-        '</div>';
+      html += '<li class="prayer-row' + (active ? ' active' : '') + '" data-key="' + item.key + '">' +
+        '<span class="pr-icon">' + (ICON_SVG[item.key] || '') + '</span>' +
+        '<span class="pr-label">' + (LABELS[state.lang][item.key] || item.rawLabel) + '</span>' +
+        '<span class="pr-time">' + item.time + '</span>' +
+        '</li>';
     });
     el.timesGrid.innerHTML = html;
 
@@ -217,15 +227,17 @@
         best = { key: key, mins: mins, time: item.time };
       }
     });
+    el.nextPrayerEyebrow.textContent = state.lang === 'ar' ? t('nextPrayer') : 'NEXT';
+
     if (!best) {
       // all prayers passed today: next is tomorrow's Fajr; show as "after midnight"
       var fajrItem = findItem('fajr');
-      el.nextPrayerLabel.textContent = t('nextPrayer') + ' — ' + t('fajr');
+      el.nextPrayerLabel.textContent = t('fajr');
       el.nextPrayerTime.textContent = fajrItem ? fajrItem.time : '—';
       el.nextPrayerCountdown.textContent = '--:--:--';
       return;
     }
-    el.nextPrayerLabel.textContent = t('nextPrayer') + ' — ' + t(best.key);
+    el.nextPrayerLabel.textContent = t(best.key);
     el.nextPrayerTime.textContent = best.time;
 
     var diffSec = Math.round((best.mins - nowMin) * 60);
