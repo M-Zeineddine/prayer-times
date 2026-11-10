@@ -54,6 +54,14 @@
     });
   }
 
+  function getBrowserTimeZone() {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function formatDateForApi(d) { return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); }
 
@@ -90,7 +98,7 @@
       params.set('longitude', '');
     }
     params.set('elevation', '');
-    params.set('timeZoneString', '');
+    params.set('timeZoneString', getBrowserTimeZone());
     params.set('LangString', state.lang);
     return params;
   }
