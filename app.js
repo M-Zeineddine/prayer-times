@@ -2,100 +2,78 @@
   'use strict';
 
   var API_BASE = 'https://www.fadlullah.org.lb/webservices/MawakitAlSalatWebService.ashx';
+  var DAY_MS = 86400000;
 
-  var ICON_ORDER = ['imsak', 'fajr', 'shourouk', 'doher', '3asr', 'maghreb', 'homra', '3asha', 'midnight'];
-  var PRAYER_KEYS = ['fajr', 'doher', '3asr', 'maghreb', '3asha']; // used for "next prayer" countdown
+  // Order matches the office's own markers; `primary` = one of the 5 obligatory prayers.
+  var ORDER = [
+    { key: 'imsak', primary: false },
+    { key: 'fajr', primary: true },
+    { key: 'shourouk', primary: false },
+    { key: 'doher', primary: true },
+    { key: '3asr', primary: true },
+    { key: 'maghreb', primary: true },
+    { key: 'homra', primary: false },
+    { key: '3asha', primary: true },
+    { key: 'midnight', primary: false }
+  ];
 
-  var LABELS = {
+  var I18N = {
     ar: {
-      imsak: 'الإمساك', fajr: 'الفجر', shourouk: 'الشروق', doher: 'الظهر',
-      '3asr': 'العصر', maghreb: 'المغرب', homra: 'غياب الحمرة', '3asha': 'العشاء', midnight: 'منتصف الليل',
-      nextPrayer: 'الصلاة القادمة', today: 'اليوم', myLocation: 'موقعي الحالي',
-      searchPlaceholder: 'ابحث عن مدينة...', source: 'المصدر: ',
-      brandSub: 'مكتب سماحة السيد محمد حسين فضل الله'
+      names: { imsak: 'الإمساك', fajr: 'الفجر', shourouk: 'الشروق', doher: 'الظهر', '3asr': 'العصر', maghreb: 'المغرب', homra: 'غياب الشفق', '3asha': 'العشاء', midnight: 'منتصف الليل' },
+      next: 'التالي', now: 'الآن', today: 'اليوم', prev: 'اليوم السابق', nextDay: 'اليوم التالي', goToday: 'العودة إلى اليوم',
+      chooseCity: 'اختر المدينة', searchPlaceholder: 'ابحث عن مدينة...', myLocation: 'موقعي الحالي', locating: 'جارِ تحديد الموقع...',
+      source: 'المواقيت بحسب مكتب سماحة السيد محمد حسين فضل الله', inWord: 'بعد', h: 'س', m: 'د',
+      gregLocale: 'ar-LB-u-nu-latn'
     },
     en: {
-      imsak: 'Imsak', fajr: 'Fajr', shourouk: 'Sunrise', doher: 'Dhuhr',
-      '3asr': 'Asr', maghreb: 'Maghrib', homra: 'End of Twilight', '3asha': 'Isha', midnight: 'Midnight',
-      nextPrayer: 'Next Prayer', today: 'Today', myLocation: 'My Location',
-      searchPlaceholder: 'Search a city...', source: 'Source: ',
-      brandSub: 'Office of Sayyid Mohammad Hussein Fadlallah'
+      names: { imsak: 'Imsak', fajr: 'Fajr', shourouk: 'Sunrise', doher: 'Dhuhr', '3asr': 'Asr', maghreb: 'Maghrib', homra: 'End of twilight', '3asha': 'Isha', midnight: 'Midnight' },
+      next: 'Next', now: 'Now', today: 'Today', prev: 'Previous day', nextDay: 'Next day', goToday: 'Back to today',
+      chooseCity: 'Choose city', searchPlaceholder: 'Search a city...', myLocation: 'My location', locating: 'Locating...',
+      source: 'Times per the office of Sayyid Mohammad Hussein Fadlallah', inWord: 'in', h: 'h', m: 'min',
+      gregLocale: 'en-GB-u-nu-latn'
     }
   };
 
-  // Small hand-drawn line icons (sun position relative to the horizon for the
-  // five solar markers, crescent/stars for the three lunar/night markers).
-  // Deliberately not emoji.
-  var ICON_SVG = {
-    imsak: '<svg viewBox="0 0 22 22" width="20" height="20"><path d="M13.6 4.3a6.4 6.4 0 1 0 4.4 9.7A7.9 7.9 0 0 1 13.6 4.3Z" fill="currentColor"/></svg>',
-    fajr: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="16" x2="19.5" y2="16"/><circle cx="11" cy="16" r="3"/><path d="M11 9.8v1.7"/><path d="M7 11.4l1.3 1.3"/><path d="M15 11.4l-1.3 1.3"/></svg>',
-    shourouk: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="16" x2="19.5" y2="16"/><circle cx="11" cy="12.3" r="3"/><path d="M11 6.2v1.7"/><path d="M6.4 9.6l1.3 1.3"/><path d="M15.6 9.6l-1.3 1.3"/></svg>',
-    doher: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="3.2"/><path d="M11 4.2v2"/><path d="M11 15.8v2"/><path d="M4.2 11h2"/><path d="M15.8 11h2"/><path d="M6.4 6.4l1.4 1.4"/><path d="M14.2 14.2l1.4 1.4"/><path d="M15.6 6.4l-1.4 1.4"/><path d="M7.8 14.2l-1.4 1.4"/></svg>',
-    '3asr': '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="16" x2="19.5" y2="16"/><circle cx="11" cy="10.3" r="3"/><path d="M11 5v1.4"/><path d="M6.6 7.2l1 1"/><path d="M15.4 7.2l-1 1"/></svg>',
-    maghreb: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="16" x2="19.5" y2="16"/><circle cx="11" cy="16" r="3"/><path d="M11 20v1.4"/><path d="M7.4 18.4l1-1"/><path d="M14.6 18.4l-1-1"/></svg>',
-    homra: '<svg viewBox="0 0 22 22" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2.5" y1="13" x2="19.5" y2="13"/><circle cx="11" cy="13" r="1.5" fill="currentColor" stroke="none"/><path d="M4.5 16.6h1.6" opacity=".55"/><path d="M8.7 16.6h1.6" opacity=".55"/><path d="M11.7 16.6h1.6" opacity=".55"/><path d="M15.9 16.6h1.6" opacity=".55"/></svg>',
-    '3asha': '<svg viewBox="0 0 22 22" width="20" height="20"><path d="M13.6 4.3a6.4 6.4 0 1 0 4.4 9.7A7.9 7.9 0 0 1 13.6 4.3Z" fill="currentColor"/><circle cx="5.6" cy="6.4" r="1" fill="currentColor"/></svg>',
-    midnight: '<svg viewBox="0 0 22 22" width="20" height="20"><circle cx="11" cy="11" r="2.4" fill="currentColor"/><circle cx="4.6" cy="5.6" r="0.9" fill="currentColor"/><circle cx="17.4" cy="5.6" r="0.9" fill="currentColor"/><circle cx="4.6" cy="16.4" r="0.9" fill="currentColor"/><circle cx="17.4" cy="16.4" r="0.9" fill="currentColor"/></svg>'
-  };
+  var ICON_CHECK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  var ICON_STAR_SMALL = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F0D49C" stroke-width="2" aria-hidden="true"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg>';
 
   var state = {
     lang: localStorage.getItem('pt_lang') || 'ar',
     city: null,
-    date: new Date(),
+    viewDate: startOfDay(new Date()),
     countries: null,
-    items: [],
-    dayLabel: '', gregLabel: '', hijriLabel: ''
+    sheetOpen: false
   };
-
   try {
     var savedCity = localStorage.getItem('pt_city');
     if (savedCity) state.city = JSON.parse(savedCity);
   } catch (e) { /* ignore */ }
-  if (!state.city) {
-    state.city = { type: 'id', id: 597, label: 'LEBANON Beirut' };
-  }
+  if (!state.city) state.city = { type: 'id', id: 597, label: 'LEBANON Beirut' };
 
-  var el = {};
-  function cacheEls() {
-    ['langToggle', 'locationBtn', 'cityChip', 'cityLabel', 'prevDay', 'nextDay',
-      'gregDate', 'hijriDate', 'nextPrayerLabel', 'nextPrayerCountdown', 'nextPrayerTime',
-      'timesGrid', 'sheetBackdrop', 'citySheet', 'citySearch', 'cityList', 'brandSub', 'sourceLabel', 'nextPrayerEyebrow'].forEach(function (id) {
-      el[id] = document.getElementById(id);
-    });
+  var cache = {}; // key -> { promise, data, error }
+
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function sameDay(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function dateKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function formatDateForApi(d) { return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); }
+
+  function cityKey() {
+    return state.city.type === 'geo'
+      ? 'geo:' + state.city.lat.toFixed(3) + ',' + state.city.lon.toFixed(3)
+      : 'id:' + state.city.id;
   }
 
   function getBrowserTimeZone() {
-    try {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    } catch (e) {
-      return '';
-    }
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; }
   }
 
-  function pad(n) { return n < 10 ? '0' + n : '' + n; }
-  function formatDateForApi(d) { return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); }
-
-  function t(key) { return LABELS[state.lang][key] || key; }
-
-  function applyLangDir() {
-    document.documentElement.lang = state.lang;
-    document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
-    el.langToggle.textContent = state.lang === 'ar' ? 'EN' : 'AR';
-    el.citySearch.placeholder = t('searchPlaceholder');
-    el.brandSub.textContent = t('brandSub');
-    el.sourceLabel.textContent = t('source');
-  }
-
-  function cityDisplayLabel() {
-    if (state.city.type === 'geo') return t('myLocation');
-    return state.city.label;
-  }
-
-  function buildFormBody() {
+  function buildFormBody(date) {
     var params = new URLSearchParams();
     params.set('toHijriDate', '');
     params.set('fromHijriDate', '');
-    params.set('miladiDate', formatDateForApi(state.date));
+    params.set('miladiDate', formatDateForApi(date));
     params.set('rangeType', 'day');
     params.set('calendarType', 'Gregorian');
     if (state.city.type === 'geo') {
@@ -113,241 +91,325 @@
     return params;
   }
 
+  function timeStrToMinutes(str) {
+    var p = str.split(':');
+    if (p.length < 2) return null;
+    return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+  }
+
   function parseResponseHtml(html) {
-    var items = [];
+    var byKey = {};
     var itemRe = /<img src="\/images\/([a-zA-Z0-9]+)\.svg"[^>]*>\s*<div>([^<]*)<\/div>\s*<div class="[^"]*d-block">([^<]*)<\/div>/g;
     var m;
     while ((m = itemRe.exec(html))) {
-      items.push({ key: m[1], rawLabel: m[2].trim(), time: m[3].trim() });
+      byKey[m[1]] = m[3].trim();
     }
-    var dateRe = /<div class="text-title">([^<]*)<\/div>[\s\S]*?<div class="text-content">([^<]*)<\/div>\s*<div class="text-content" dir='rtl'>([^<]*)<\/div>/;
+    var dateRe = /<div class="text-content" dir='rtl'>([^<]*)<\/div>/;
     var dm = dateRe.exec(html);
-    var dayLabel = dm ? dm[1].trim() : '';
-    var gregLabel = dm ? dm[2].trim() : '';
-    var hijriLabel = dm ? dm[3].trim() : '';
-    return { items: items, dayLabel: dayLabel, gregLabel: gregLabel, hijriLabel: hijriLabel };
+    var hijriLabel = dm ? dm[1].trim() : '';
+    var items = ORDER.map(function (o) {
+      var time = byKey[o.key] || '';
+      return { key: o.key, primary: o.primary, time: time, minutes: time ? timeStrToMinutes(time) : null };
+    });
+    return { items: items, hijriLabel: hijriLabel };
   }
 
-  function showLoader(show) {
-    el.timesGrid.innerHTML = show ? '<li class="loader" id="loader">' + (state.lang === 'ar' ? 'جارِ التحميل...' : 'Loading...') + '</li>' : '';
-  }
-
-  function fetchPrayerTimes() {
-    showLoader(true);
-    var body = buildFormBody();
-    return fetch(API_BASE + '?action=CallAllFunctionsAsync', {
-      method: 'POST',
-      body: body
-    })
+  function fetchDay(date) {
+    var body = buildFormBody(date);
+    return fetch(API_BASE + '?action=CallAllFunctionsAsync', { method: 'POST', body: body })
       .then(function (r) { return r.json(); })
       .then(function (json) {
         if (json.error) throw new Error(json.message || 'error');
-        var parsed = parseResponseHtml(json.data || '');
-        state.items = parsed.items;
-        state.dayLabel = parsed.dayLabel;
-        state.gregLabel = parsed.gregLabel;
-        state.hijriLabel = parsed.hijriLabel;
-        renderTimes();
-        renderDate();
-      })
-      .catch(function (err) {
-        el.timesGrid.innerHTML = '<li class="loader">' + (state.lang === 'ar' ? 'تعذر تحميل المواقيت' : 'Failed to load times') + '</li>';
-        console.error(err);
+        return parseResponseHtml(json.data || '');
       });
   }
 
-  function renderDate() {
-    el.gregDate.textContent = state.gregLabel ? (state.dayLabel + ' — ' + state.gregLabel) : '—';
-    el.hijriDate.textContent = state.hijriLabel || '—';
+  // Loads the viewed day plus its two neighbors (so pre-Imsak / post-Midnight
+  // edge cases at the start/end of the day resolve without a visible delay).
+  function loadAroundDate(centerDate) {
+    var ck = cityKey();
+    [-1, 0, 1].forEach(function (off) {
+      var d = addDays(centerDate, off);
+      var key = ck + '|' + dateKey(d) + '|' + state.lang;
+      if (cache[key]) return;
+      var entry = { promise: null, data: null, error: null };
+      cache[key] = entry;
+      entry.promise = fetchDay(d).then(function (data) {
+        entry.data = data;
+        renderMain();
+      }).catch(function (err) {
+        entry.error = err;
+        renderMain();
+      });
+    });
+    return cache[ck + '|' + dateKey(centerDate) + '|' + state.lang];
   }
 
-  function timeStrToMinutes(str) {
-    var parts = str.split(':');
-    if (parts.length < 2) return null;
-    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+  function getCached(date) {
+    var key = cityKey() + '|' + dateKey(date) + '|' + state.lang;
+    var entry = cache[key];
+    return entry && entry.data ? entry.data : null;
   }
 
-  function renderTimes() {
-    if (!state.items.length) {
-      el.timesGrid.innerHTML = '<li class="loader">' + (state.lang === 'ar' ? 'لا توجد بيانات' : 'No data') + '</li>';
+  function nowMinutes() {
+    var n = new Date();
+    return n.getHours() * 60 + n.getMinutes() + n.getSeconds() / 60;
+  }
+
+  function fmtCountdown(remainMin) {
+    var remainSec = Math.max(0, Math.round(remainMin * 60));
+    var h = Math.floor(remainSec / 3600);
+    var m = Math.floor((remainSec % 3600) / 60);
+    var s = remainSec % 60;
+    return h + ':' + pad(m) + ':' + pad(s);
+  }
+
+  function compute() {
+    var T = I18N[state.lang];
+    var today = getCached(state.viewDate);
+    if (!today) return null;
+
+    var isToday = sameDay(state.viewDate, new Date());
+    var curIdx = -1, nextIdx = -1, curMin = null, nextMin = null, fromText = '', toText = '';
+
+    if (isToday) {
+      var now = nowMinutes();
+      today.items.forEach(function (it, k) { if (it.minutes !== null && it.minutes <= now) curIdx = k; });
+
+      if (curIdx === -1) {
+        // Before Imsak: "current" is yesterday's Midnight (not a cell in today's grid).
+        nextIdx = 0;
+        nextMin = today.items[0].minutes;
+        var prev = getCached(addDays(state.viewDate, -1));
+        if (prev && prev.items[8].minutes !== null) {
+          curMin = prev.items[8].minutes - 1440;
+          fromText = T.names.midnight + ' ' + prev.items[8].time;
+        }
+        toText = T.names[ORDER[0].key] + ' ' + today.items[0].time;
+      } else if (curIdx === 8) {
+        // After Midnight: "next" is tomorrow's Imsak (not a cell in today's grid).
+        curMin = today.items[8].minutes;
+        fromText = T.names.midnight + ' ' + today.items[8].time;
+        var next = getCached(addDays(state.viewDate, 1));
+        if (next && next.items[0].minutes !== null) {
+          nextMin = next.items[0].minutes + 1440;
+          toText = T.names[ORDER[0].key] + ' ' + next.items[0].time;
+        }
+      } else {
+        nextIdx = curIdx + 1;
+        curMin = today.items[curIdx].minutes;
+        nextMin = today.items[nextIdx].minutes;
+        fromText = T.names[ORDER[curIdx].key] + ' ' + today.items[curIdx].time;
+        toText = T.names[ORDER[nextIdx].key] + ' ' + today.items[nextIdx].time;
+      }
+    }
+
+    var hasTarget = isToday && curMin !== null && nextMin !== null;
+    var progress = hasTarget ? Math.min(1, Math.max(0, (nowMinutes() - curMin) / Math.max(1, nextMin - curMin))) : 0;
+    var remain = hasTarget ? nextMin - nowMinutes() : null;
+
+    var cells = today.items.map(function (it, k) {
+      return {
+        key: it.key,
+        label: T.names[it.key],
+        time: it.time || '—',
+        primary: it.primary,
+        current: isToday && k === curIdx,
+        next: isToday && k === nextIdx
+      };
+    });
+
+    var nextName = nextIdx !== -1 ? T.names[ORDER[nextIdx].key] : (curIdx === 8 ? T.names.imsak : '—');
+
+    return {
+      T: T, cells: cells, hijri: today.hijriLabel, isToday: isToday,
+      hasTarget: hasTarget, countdown: hasTarget ? fmtCountdown(remain) : '--:--:--',
+      progressPct: (progress * 100).toFixed(1) + '%',
+      nextName: nextName, fromText: fromText, toText: toText
+    };
+  }
+
+  // ---- DOM refs ----
+  var el = {};
+  function cacheEls() {
+    ['cityChip', 'cityLabel', 'locateBtn', 'langEn', 'langAr',
+      'prevDay', 'nextDay', 'todayBtn', 'gregDate', 'hijriDate', 'todayPill',
+      'hero', 'nextLead', 'nextName', 'count', 'fill', 'fromText', 'toText',
+      'grid', 'sourceLine',
+      'sheet', 'sheetBackdrop', 'sheetTitle', 'citySearch', 'cityOptList'].forEach(function (id) {
+      el[id] = document.getElementById(id);
+    });
+  }
+
+  function cityDisplayLabel() {
+    var T = I18N[state.lang];
+    return state.city.type === 'geo' ? T.myLocation : state.city.label;
+  }
+
+  function renderMain() {
+    var T = I18N[state.lang];
+    var ar = state.lang === 'ar';
+    document.documentElement.lang = state.lang;
+    document.documentElement.dir = ar ? 'rtl' : 'ltr';
+    document.title = ar ? 'مواقيت الصلاة' : 'Prayer Times';
+
+    el.cityLabel.textContent = cityDisplayLabel();
+    el.langEn.setAttribute('aria-pressed', String(!ar));
+    el.langAr.setAttribute('aria-pressed', String(ar));
+    el.sheetTitle.textContent = T.chooseCity;
+    el.citySearch.placeholder = T.searchPlaceholder;
+    el.sourceLine.textContent = T.source;
+
+    var greg = new Intl.DateTimeFormat(T.gregLocale, { weekday: 'long', day: 'numeric', month: 'long' }).format(state.viewDate);
+    el.gregDate.textContent = greg;
+    var isToday = sameDay(state.viewDate, new Date());
+    el.todayPill.hidden = isToday;
+    el.todayPill.textContent = T.today;
+    el.todayBtn.setAttribute('aria-label', T.goToday);
+    el.prevDay.setAttribute('aria-label', T.prev);
+    el.nextDay.setAttribute('aria-label', T.nextDay);
+
+    var v = compute();
+
+    if (!v) {
+      el.hijriDate.textContent = '—';
+      el.hero.hidden = true;
+      el.grid.innerHTML = '<li class="loading">' + (ar ? 'جارِ التحميل...' : 'Loading...') + '</li>';
       return;
     }
-    var nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-    var order = {};
-    ICON_ORDER.forEach(function (k, i) { order[k] = i; });
-    var sorted = state.items.slice().sort(function (a, b) { return (order[a.key] || 99) - (order[b.key] || 99); });
+
+    el.hijriDate.textContent = v.hijri || '—';
+
+    if (v.isToday) {
+      el.hero.hidden = false;
+      el.nextLead.textContent = T.next;
+      el.nextName.textContent = v.nextName;
+      el.count.textContent = v.countdown;
+      el.fill.style.width = v.progressPct;
+      el.fromText.textContent = v.fromText;
+      el.toText.textContent = v.toText;
+    } else {
+      el.hero.hidden = true;
+    }
 
     var html = '';
-    sorted.forEach(function (item) {
-      var isPrayer = PRAYER_KEYS.indexOf(item.key) !== -1;
-      var mins = timeStrToMinutes(item.time);
-      var active = false;
-      if (isPrayer && mins !== null) {
-        active = isCurrentPeriod(item.key, mins, nowMin);
-      }
-      html += '<li class="prayer-row' + (active ? ' active' : '') + '" data-key="' + item.key + '">' +
-        '<span class="pr-icon">' + (ICON_SVG[item.key] || '') + '</span>' +
-        '<span class="pr-label">' + (LABELS[state.lang][item.key] || item.rawLabel) + '</span>' +
-        '<span class="pr-time">' + item.time + '</span>' +
-        '</li>';
+    v.cells.forEach(function (c) {
+      var cls = 'cell ' + (c.primary ? 'primary' : 'secondary') + (c.current ? ' current' : '') + (c.next ? ' next' : '');
+      html += '<li class="' + cls + '"' + (c.current ? ' aria-current="time"' : '') + '>' +
+        '<span class="top"><span class="label">' + c.label + '</span>' + (c.current ? ICON_STAR_SMALL : '') + '</span>' +
+        '<span style="display:flex;flex-direction:column;gap:4px">' +
+        '<span class="time num" dir="ltr">' + c.time + '</span>' +
+        '<span class="status">' + (c.current ? T.now : (c.next ? T.next : '')) + '</span>' +
+        '</span></li>';
     });
-    el.timesGrid.innerHTML = html;
-
-    updateNextPrayer();
+    el.grid.innerHTML = html;
   }
 
-  function isCurrentPeriod(key, startMin, nowMin) {
-    var idx = PRAYER_KEYS.indexOf(key);
-    var nextStart = null;
-    for (var i = idx + 1; i < PRAYER_KEYS.length; i++) {
-      var nextItem = findItem(PRAYER_KEYS[i]);
-      if (nextItem) { nextStart = timeStrToMinutes(nextItem.time); break; }
-    }
-    if (nextStart === null) {
-      return nowMin >= startMin;
-    }
-    return nowMin >= startMin && nowMin < nextStart;
-  }
-
-  function findItem(key) {
-    for (var i = 0; i < state.items.length; i++) if (state.items[i].key === key) return state.items[i];
-    return null;
-  }
-
-  function updateNextPrayer() {
-    var now = new Date();
-    var nowMin = now.getHours() * 60 + now.getMinutes() * 1 + now.getSeconds() / 60;
-    var best = null;
-    PRAYER_KEYS.forEach(function (key) {
-      var item = findItem(key);
-      if (!item) return;
-      var mins = timeStrToMinutes(item.time);
-      if (mins === null) return;
-      if (mins > nowMin && (best === null || mins < best.mins)) {
-        best = { key: key, mins: mins, time: item.time };
-      }
-    });
-    el.nextPrayerEyebrow.textContent = state.lang === 'ar' ? t('nextPrayer') : 'NEXT';
-
-    if (!best) {
-      // all prayers passed today: next is tomorrow's Fajr; show as "after midnight"
-      var fajrItem = findItem('fajr');
-      el.nextPrayerLabel.textContent = t('fajr');
-      el.nextPrayerTime.textContent = fajrItem ? fajrItem.time : '—';
-      el.nextPrayerCountdown.textContent = '--:--:--';
-      return;
-    }
-    el.nextPrayerLabel.textContent = t(best.key);
-    el.nextPrayerTime.textContent = best.time;
-
-    var diffSec = Math.round((best.mins - nowMin) * 60);
-    var h = Math.floor(diffSec / 3600);
-    var m = Math.floor((diffSec % 3600) / 60);
-    var s = diffSec % 60;
-    el.nextPrayerCountdown.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
-  }
-
-  function tickCountdown() {
-    if (state.items.length) {
-      renderTimes();
-    }
-  }
-
-  // ---- City picker ----
+  // ---- City sheet ----
   function loadCountries() {
     if (state.countries) return Promise.resolve(state.countries);
-    return fetch('data/countries.json')
-      .then(function (r) { return r.json(); })
-      .then(function (list) { state.countries = list; return list; });
+    return fetch('data/countries.json').then(function (r) { return r.json(); }).then(function (list) {
+      state.countries = list;
+      return list;
+    });
   }
 
-  function openSheet() {
-    el.sheetBackdrop.classList.add('open');
-    el.citySheet.classList.add('open');
-    el.citySearch.value = '';
-    loadCountries().then(renderCityList.bind(null, ''));
-    setTimeout(function () { el.citySearch.focus(); }, 150);
-  }
-  function closeSheet() {
-    el.sheetBackdrop.classList.remove('open');
-    el.citySheet.classList.remove('open');
-  }
-
-  function renderCityList(query) {
+  function renderCityOptions(query) {
     var list = state.countries || [];
     var q = (query || '').trim().toLowerCase();
     var filtered = q ? list.filter(function (c) { return c.label.toLowerCase().indexOf(q) !== -1; }) : list.slice(0, 80);
     if (filtered.length > 200) filtered = filtered.slice(0, 200);
     var html = '';
     filtered.forEach(function (c) {
-      html += '<div class="city-item" data-id="' + c.id + '" data-label="' + c.label.replace(/"/g, '&quot;') + '">' +
-        '<span>' + c.city + '</span><span class="ci-country">' + c.country + '</span></div>';
+      var selected = state.city.type === 'id' && state.city.id === c.id;
+      html += '<button class="opt" data-act="selectCity" data-id="' + c.id + '" data-label="' + c.label.replace(/"/g, '&quot;') + '" aria-pressed="' + selected + '">' +
+        '<span>' + c.city + ' <span class="ci-country">' + c.country + '</span></span>' +
+        (selected ? ICON_CHECK : '') + '</button>';
     });
-    el.cityList.innerHTML = html || '<div class="loader">' + (state.lang === 'ar' ? 'لا نتائج' : 'No results') + '</div>';
+    el.cityOptList.innerHTML = html || '<div class="loading">—</div>';
   }
 
-  function selectCityById(id, label) {
+  function openSheet() {
+    state.sheetOpen = true;
+    el.sheet.classList.add('open');
+    el.citySearch.value = '';
+    loadCountries().then(function () { renderCityOptions(''); });
+    setTimeout(function () { el.citySearch.focus(); }, 150);
+  }
+  function closeSheet() {
+    state.sheetOpen = false;
+    el.sheet.classList.remove('open');
+  }
+
+  function selectCity(id, label) {
     state.city = { type: 'id', id: id, label: label };
     localStorage.setItem('pt_city', JSON.stringify(state.city));
-    el.cityLabel.textContent = cityDisplayLabel();
     closeSheet();
-    fetchPrayerTimes();
+    renderMain();
+    loadAroundDate(state.viewDate).promise.then(renderMain);
   }
 
   function useGeolocation() {
     if (!navigator.geolocation) return;
-    el.cityLabel.textContent = state.lang === 'ar' ? 'جارِ تحديد الموقع...' : 'Locating...';
+    var T = I18N[state.lang];
+    el.cityLabel.textContent = T.locating;
     navigator.geolocation.getCurrentPosition(function (pos) {
       state.city = { type: 'geo', lat: pos.coords.latitude, lon: pos.coords.longitude };
       localStorage.setItem('pt_city', JSON.stringify(state.city));
-      el.cityLabel.textContent = cityDisplayLabel();
-      fetchPrayerTimes();
+      renderMain();
+      loadAroundDate(state.viewDate).promise.then(renderMain);
     }, function () {
-      el.cityLabel.textContent = cityDisplayLabel();
+      renderMain();
     }, { timeout: 8000 });
   }
 
   // ---- Events ----
   function bindEvents() {
-    el.langToggle.addEventListener('click', function () {
-      state.lang = state.lang === 'ar' ? 'en' : 'ar';
-      localStorage.setItem('pt_lang', state.lang);
-      applyLangDir();
-      el.cityLabel.textContent = cityDisplayLabel();
-      fetchPrayerTimes();
-    });
-
-    el.locationBtn.addEventListener('click', useGeolocation);
     el.cityChip.addEventListener('click', openSheet);
+    el.locateBtn.addEventListener('click', useGeolocation);
     el.sheetBackdrop.addEventListener('click', closeSheet);
-
-    el.citySearch.addEventListener('input', function () {
-      renderCityList(el.citySearch.value);
+    el.citySearch.addEventListener('input', function () { renderCityOptions(el.citySearch.value); });
+    el.cityOptList.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act="selectCity"]');
+      if (!b) return;
+      selectCity(parseInt(b.getAttribute('data-id'), 10), b.getAttribute('data-label'));
     });
 
-    el.cityList.addEventListener('click', function (e) {
-      var item = e.target.closest('.city-item');
-      if (!item) return;
-      selectCityById(parseInt(item.getAttribute('data-id'), 10), item.getAttribute('data-label'));
+    el.langEn.addEventListener('click', function () { setLang('en'); });
+    el.langAr.addEventListener('click', function () { setLang('ar'); });
+
+    el.prevDay.addEventListener('click', function () { changeDate(-1); });
+    el.nextDay.addEventListener('click', function () { changeDate(1); });
+    el.todayBtn.addEventListener('click', function () {
+      state.viewDate = startOfDay(new Date());
+      loadAroundDate(state.viewDate);
+      renderMain();
     });
 
-    el.prevDay.addEventListener('click', function () {
-      state.date = new Date(state.date.getTime() - 86400000);
-      fetchPrayerTimes();
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && state.sheetOpen) closeSheet();
     });
-    el.nextDay.addEventListener('click', function () {
-      state.date = new Date(state.date.getTime() + 86400000);
-      fetchPrayerTimes();
-    });
+  }
+
+  function setLang(lang) {
+    state.lang = lang;
+    localStorage.setItem('pt_lang', lang);
+    loadAroundDate(state.viewDate);
+    renderMain();
+  }
+
+  function changeDate(delta) {
+    state.viewDate = addDays(state.viewDate, delta);
+    loadAroundDate(state.viewDate);
+    renderMain();
   }
 
   function init() {
     cacheEls();
-    applyLangDir();
-    el.cityLabel.textContent = cityDisplayLabel();
     bindEvents();
-    fetchPrayerTimes();
-    setInterval(tickCountdown, 1000);
+    loadAroundDate(state.viewDate);
+    renderMain();
+    setInterval(renderMain, 1000);
 
     if ('serviceWorker' in navigator) {
       var refreshing = false;
@@ -356,9 +418,7 @@
         refreshing = true;
         window.location.reload();
       });
-      navigator.serviceWorker.register('sw.js').then(function (reg) {
-        reg.update();
-      }).catch(function () {});
+      navigator.serviceWorker.register('sw.js').then(function (reg) { reg.update(); }).catch(function () {});
     }
   }
 

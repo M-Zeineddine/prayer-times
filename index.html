@@ -1,78 +1,77 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مواقيت الصلاة</title>
-  <meta name="description" content="مواقيت الصلاة بحسب مكتب سماحة السيد محمد حسين فضل الله" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مواقيت الصلاة</title>
+<meta name="description" content="مواقيت الصلاة بحسب مكتب سماحة السيد محمد حسين فضل الله">
 
-  <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#0e5a5e" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="مواقيت الصلاة" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <link rel="icon" href="icons/icon-192.png" />
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#E9E2D4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مواقيت الصلاة">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
+<div class="app" id="app">
 
-    <header class="topbar">
-      <button id="langToggle" class="sq-btn" aria-label="Language">EN</button>
-      <div class="brand">
-        <span class="brand-title" id="brandTitle">مواقيت الصلاة</span>
-        <span class="brand-sub" id="brandSub">مكتب سماحة السيد محمد حسين فضل الله</span>
-      </div>
-      <button id="locationBtn" class="sq-btn" aria-label="Location">
-        <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 15s5.5-5.3 5.5-9.2A5.5 5.5 0 0 0 2.5 5.8C2.5 9.7 8 15 8 15z"/><circle cx="8" cy="5.8" r="2"/></svg>
-      </button>
-    </header>
-
-    <button class="location-row" id="cityChip">
-      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 15s5.5-5.3 5.5-9.2A5.5 5.5 0 0 0 2.5 5.8C2.5 9.7 8 15 8 15z"/><circle cx="8" cy="5.8" r="2"/></svg>
-      <span id="cityLabel">...</span>
+  <header class="header">
+    <button class="city" id="cityChip">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E4B7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      <span id="cityLabel">…</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4E5768" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
+    <button class="locate" id="locateBtn" aria-label="Use my location">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E4B7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    </button>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-act="lang" data-v="en" id="langEn" aria-label="English">EN</button>
+      <button class="ar" data-act="lang" data-v="ar" id="langAr" aria-label="العربية">ع</button>
+    </div>
+  </header>
 
-    <section class="date-nav">
-      <button id="prevDay" class="nav-btn" aria-label="Previous day">‹</button>
-      <div class="date-display">
-        <div id="gregDate" class="greg-date">—</div>
-        <div id="hijriDate" class="hijri-date">—</div>
-      </div>
-      <button id="nextDay" class="nav-btn" aria-label="Next day">›</button>
-    </section>
+  <nav class="datebar" aria-label="Date">
+    <button class="arrow" id="prevDay" aria-label="Previous day"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button class="mid" id="todayBtn" aria-label="Back to today">
+      <span class="greg"><span id="gregDate">—</span><span class="today-pill" id="todayPill" hidden>Today</span></span>
+      <span class="hijri" id="hijriDate">—</span>
+    </button>
+    <button class="arrow" id="nextDay" aria-label="Next day"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+  </nav>
 
-    <section class="next-prayer" id="nextPrayerCard">
-      <div class="np-top">
-        <span class="np-eyebrow" id="nextPrayerEyebrow">NEXT</span>
-        <span class="np-name" id="nextPrayerLabel">—</span>
-        <span class="np-time" id="nextPrayerTime">—</span>
-      </div>
-      <div class="np-countdown" id="nextPrayerCountdown">--:--:--</div>
-    </section>
+  <section class="hero" id="hero" aria-label="Next prayer">
+    <svg class="star" width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="0.6" aria-hidden="true"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/><circle cx="12" cy="12" r="3"/></svg>
+    <div class="lead"><span id="nextLead">Next</span> · <strong id="nextName">—</strong></div>
+    <div><span class="count num" dir="ltr" id="count">--:--:--</span></div>
+    <div class="track"><div class="fill" id="fill" style="width:0%"></div></div>
+    <div class="ends"><span id="fromText"></span><span id="toText"></span></div>
+  </section>
 
-    <ul id="timesGrid" class="prayer-list">
-      <li class="loader" id="loader"></li>
-    </ul>
+  <ol class="grid" id="grid" aria-label="Today's times">
+    <li class="loading" id="loading">…</li>
+  </ol>
 
-    <footer class="app-footer">
-      <span id="sourceLabel">المصدر: </span>
-      <a href="https://www.fadlullah.org.lb/prayer-time" target="_blank" rel="noopener">fadlullah.org.lb</a>
-    </footer>
+  <p class="source" id="sourceLine"></p>
+
+</div>
+
+<div class="sheet" id="sheet">
+  <button class="backdrop" id="sheetBackdrop" aria-label="Close"></button>
+  <div class="panel" role="dialog" aria-label="Choose city">
+    <div class="handle"></div>
+    <h2 id="sheetTitle">Choose city</h2>
+    <input type="search" class="search" id="citySearch" autocomplete="off" placeholder="Search a city…">
+    <div class="opt-list" id="cityOptList"></div>
   </div>
+</div>
 
-  <div class="sheet-backdrop" id="sheetBackdrop"></div>
-  <div class="sheet" id="citySheet">
-    <div class="sheet-handle"></div>
-    <input type="search" id="citySearch" class="city-search" placeholder="ابحث عن مدينة..." autocomplete="off" />
-    <div id="cityList" class="city-list"></div>
-  </div>
-
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

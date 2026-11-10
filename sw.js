@@ -1,4 +1,4 @@
-var CACHE_NAME = 'prayer-times-v2';
+var CACHE_NAME = 'prayer-times-v3';
 var ASSETS = [
   './',
   './index.html',

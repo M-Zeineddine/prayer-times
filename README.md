@@ -14,11 +14,11 @@ Then open http://localhost:8787
 (No build step — it's plain HTML/CSS/JS. Any static file server works.)
 
 ## Features
-- Live prayer times (Imsak, Fajr, Sunrise, Dhuhr, Asr, Maghrib, End of Twilight, Isha, Midnight)
-- Countdown to the next prayer, current-period highlight
-- City picker (2300+ cities worldwide, same list as the source site) or device geolocation
-- Arabic / English toggle, Hijri + Gregorian date
-- Day navigation (prev/next)
+- Live prayer times in a 3x3 tile grid (Imsak, Fajr, Sunrise, Dhuhr, Asr, Maghrib, End of Twilight, Isha, Midnight)
+- Countdown + progress bar to the next marker, current-marker highlight — works across the Imsak/Midnight day boundary by pre-fetching yesterday/tomorrow in the background
+- City picker (2300+ cities worldwide, same list as the source site, with search) or device geolocation
+- Arabic / English toggle, Hijri (from the office's own calculation) + Gregorian date
+- Day navigation (prev/next/today)
 - Installable on iOS/Android home screen (Add to Home Screen) via the web app manifest + service worker — works offline for the UI shell, times still require network.
 
 ## Notes on data source
